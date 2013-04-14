@@ -1,4 +1,5 @@
-scrumtools
-==========
+# Scrum Tools
 
-Tools for scrum
+Tools for Scrum.
+
+### [Setup](/oneself/scrumtools/wiki/Setup)
