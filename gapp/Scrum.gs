@@ -785,7 +785,7 @@ var THEME_COLORS = ["#9fc5e8", "#b4a7d6", "#ffe599", "#ea9999", "#93c47d"];
 function getConfigThemes() {
   var themes = getThemes();
   if (themes == null) {
-    return "";
+    return "Theme 1\nTheme 2\n";
   }
   return themes.join("\n");
 }
@@ -798,7 +798,7 @@ function getConfigThemes() {
 function getConfigBacklogs() {
   var backlogs = getBacklogs();
   if (backlogs == null) {
-    return "";
+    return "Backlogs";
   }
   return backlogs.join("\n");
 }
