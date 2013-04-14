@@ -2,4 +2,4 @@
 
 Tools for Scrum.
 
-### [Setup](/oneself/scrumtools/wiki/Setup)
+### [Setup](https://github.com/oneself/scrumtools/wiki/Setup)
