@@ -1,3 +1,159 @@
+  ////////////
+ // CONFIG //
+////////////
+
+/**
+ * Get raw value from configuration sheet given a key.
+ *
+ * @param  key String name of the config key.
+ * @return     Range or null of not found.
+ */
+function getRawValue(key) {
+  try {
+    var config = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Config");
+    if (config == null) {
+      return null;
+    }
+    return config.getRange(key);
+  } catch(e) {
+    return null;
+  }
+}
+
+/**
+ * Get a value from configuration.
+ *
+ * @param  key String name of config key
+ * @return     Object or null if not found.
+ */
+function getValue(key) {
+  var r = getRawValue(key);
+  if (r == null) {
+    return null;
+  }
+  return r.getValue();
+}
+
+/**
+ * Get values from configuration.
+ *
+ * @param  key String name of config key
+ * @return     Array or null if not found.
+ */
+function getValues(key) {
+  var r = getRawValue(key);
+  if (r == null) {
+    return null;
+  }
+  return r.getValues()[0];
+}
+
+/**
+ * Get the current story ID from configuration.
+ *
+ * @return int ID.
+ */
+function getCurrentId() {
+  return getValue("nextId");
+}
+
+/**
+ * Increment story ID and return new ID.
+ *
+ * @return int ID.
+ */
+function nextId() {
+  nextId = getRawValue("nextId");
+  var id = nextId.getValue();
+  id += 1;
+  nextId.setValue(id);
+  return id;
+}
+
+/**
+ * Get names of backlog sheets.
+ *
+ * @return Array of String backlog sheet names.
+ */
+function getBacklogs() {
+  return getValues("backlogs");
+}
+
+/**
+ * Is given sheet a backlog.
+ *
+ * @param  sheet Spreadsheet object.
+ * @return       true if sheet is a backlog, false otherwise.
+ */
+function isBacklog(sheet) {
+  var name = sheet.getName();
+  var backlogs = getBacklogs();
+  for (var i = 0; i < backlogs.length; ++i) {
+    if (name == backlogs[i]) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Get theme names.
+ *
+ * @return Array of String theme names.
+ */
+function getThemes() {
+  return getValues("themes");
+}
+
+/**
+ * Get all theme colors
+ */
+function getAllColors() {
+  try {
+    var config = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Config");
+    if (config == null) {
+      return THEME_COLORS;
+    }
+    var themesRange = config.getRange("themes");
+    var row = themesRange.getRow();
+    var themes = config.getRange(row, 2, 1, 5);
+    var themeColors = themes.getBackgrounds()[0];
+    if (all(themeColors, "white")) {
+      return THEME_COLORS;
+    }
+    return themeColors;
+  } catch(ex) {
+    return THEME_COLORS;
+  }
+}
+
+/*
+ *
+ * @return int spring length in milliseconds.
+ */
+function getSprintLength() {
+  return getSprintLengthDays() * 24 * 60 * 60 * 1000;
+}
+
+/**
+ * Get sprint length in days.
+ *
+ * @return int spring length in days.
+ */
+function getSprintLengthDays() {
+  return getValue("sprintLength");
+}
+
+/**
+ * Get sprint start day.
+ *
+ * @return String, one of "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
+ */
+function getSprintStartDay() {
+  return getValue("sprintStartDay");
+}
+
+
   /////////
  // IDS //
 /////////
@@ -109,140 +265,6 @@ function onThemeColorAll() {
   }
 }
 
-  ////////////
- // CONFIG //
-////////////
-
-/**
- * Get raw value from configuration sheet given a key.
- *
- * @param  key String name of the config key.
- * @return     Range or null of not found.
- */
-function getRawValue(key) {
-  try {
-    var config = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Config");
-    if (config == null) {
-      return null;
-    }
-    return config.getRange(key);
-  } catch(e) {
-    return null;
-  }
-}
-
-/**
- * Get a value from configuration.
- *
- * @param  key String name of config key
- * @return     Object or null if not found.
- */
-function getValue(key) {
-  var r = getRawValue(key);
-  if (r == null) {
-    return null;
-  }
-  return r.getValue();
-}
-
-/**
- * Get values from configuration.
- *
- * @param  key String name of config key
- * @return     Array or null if not found.
- */
-function getValues(key) {
-  var r = getRawValue(key);
-  if (r == null) {
-    return null;
-  }
-  return r.getValues()[0];
-}
-
-/**
- * Get the current story ID from configuration.
- *
- * @return int ID.
- */
-function getCurrentId() {
-  return getValue("nextId");
-}
-
-/**
- * Increment story ID and return new ID.
- *
- * @return int ID.
- */
-function nextId() {
-  nextId = getRawValue("nextId");
-  var id = nextId.getValue();
-  id += 1;
-  nextId.setValue(id);
-  return id;
-}
-
-/**
- * Get names of backlog sheets.
- *
- * @return Array of String backlog sheet names.
- */
-function getBacklogs() {
-  return getValues("backlogs");
-}
-
-/**
- * Get theme names.
- *
- * @return Array of String theme names.
- */
-function getThemes() {
-  return getValues("themes");
-}
-
-/**
- * Is given sheet a backlog.
- *
- * @param  sheet Spreadsheet object.
- * @return       true if sheet is a backlog, false otherwise.
- */
-function isBacklog(sheet) {
-  var name = sheet.getName();
-  var backlogs = getBacklogs();
-  for (var i = 0; i < backlogs.length; ++i) {
-    if (name == backlogs[i]) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * Get sprint length in milliseconds.
- *
- * @return int spring length in milliseconds.
- */
-function getSprintLength() {
-  return getSprintLengthDays() * 24 * 60 * 60 * 1000;
-}
-
-/**
- * Get sprint length in days.
- *
- * @return int spring length in days.
- */
-function getSprintLengthDays() {
-  return getValue("sprintLength");
-}
-
-/**
- * Get sprint start day.
- *
- * @return String, one of "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
- */
-function getSprintStartDay() {
-  return getValue("sprintStartDay");
-}
-
 
   //////////////
  // BURNDOWN //
@@ -253,6 +275,20 @@ STATUS_COMPLETED = "Completed";
 STATUS_IN_PROGRESS = "In Progress";
 STATUS_PLANNED = "Planned";
 STATUS_AUTO = "Auto";
+
+/**
+ * Check array values
+ *
+ * @return true if all values in "a" are "v"
+ */
+function all(a, v) {
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] != v) {
+      return false;
+    }
+  }
+  return true;
+}
 
 /**
  * Convert a String into an integer.
@@ -282,6 +318,37 @@ function float(s) {
   } else {
     return i;
   }
+}
+
+/**
+ * Convert a String into a date.
+ *
+ * @param  s String
+ * @return   Date, if connot parse or null, return null.
+ */
+function date(s) {
+  try {
+    return Utilities.formatDate(s, "EST", "yyyy/MM/dd");
+  } catch(ex) {
+    return null;
+  }
+}
+
+/**
+ * Check empty string
+ *
+ * @param  s String
+ * @return   String, if empty, return null.
+ */
+function str(s) {
+  if (s == null) {
+    return null;
+  }
+  s = s.replace(/^\s+|\s+$/g, '');
+  if (s.length <= 0) {
+    return null;
+  }
+  return s;
 }
 
 /**
@@ -321,7 +388,7 @@ function Sprint(sprintName, startDate, status) {
   self.startDate = startDate;
   // Sprint start date formatted as a string
   if (startDate != null)
-    self.startDateStr = Utilities.formatDate(startDate, "EST", "yyyy/MM/dd");
+    self.startDateStr = date(startDate);
   // Full name
   self.fullname = self.name + " (" + self.startDateStr + ")";
   // Sprint status
@@ -488,19 +555,22 @@ function Backlog() {
      */
     it.next = function() {
       index += 1;
+      var sd = startDate;
       if (index < sprints.length) {
         // Get sprint
         var s = sprints[index];
         // Update start date
         if (s.startDate != null) {
-          var sd = s.startDate;
+          // Save current sprint date for later
           startDate = s.startDate;
         } else {
-          var sd = startDate;
+          // Incerement date.
           startDate.setDate(startDate.getDate() + getSprintLength());
         }
       } else {
+        sd = startDate;
         var sprintName = "Sprint " + (index + 1);
+        // Increment start date.
         startDate.setTime(startDate.getTime() + getSprintLength());
         // Setting status to "auto" since this was automatically generated.
         s = Sprint(sprintName, startDate, STATUS_AUTO);
@@ -554,7 +624,7 @@ function getBacklogData() {
     var name = data[i][2];
     if (name.indexOf("Sprint ") == 0) {
       // Create new sprint and add to backlog
-      current = Sprint(name, data[i][3], data[i][7]);
+      current = Sprint(name, data[i][3], str(data[i][7]));
       backlog.pushSprint(current);
     } else if (name == "Not Assigned") {
       // Push not assigned sprint
@@ -670,6 +740,10 @@ function createCharts(dataSheet) {
   dataSheet.insertChart(chart.build());
 }
 
+function onCreateCharts() {
+  createCharts(SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Data"));
+}
+
   ////////////////////
  // INITIALIZATION //
 ////////////////////
@@ -698,7 +772,7 @@ DAY_OF_WEEK = {
  "Saturday":  {"name": "Sat", "index": 6}};
 
 var HEADERS =       [["ID", "Theme", "Story", "Completion Criteria", "Pt", "Comment", "Release", "Status"]];
-var COLUMN_WIDTHS =  [30  , 80     , 500    , 250                 , 30  , 100      , 80       , 100 ];
+var COLUMN_WIDTHS =  [30  , 80     , 500    , 250                 , 30  , 100      , 80       , 110 ];
 
 var THEME_COLORS = ["#9fc5e8", "#b4a7d6", "#ffe599", "#ea9999", "#93c47d"];
 
@@ -752,7 +826,7 @@ function getConfigSprintLengthIndex() {
 function getConfigCurrentId() {
   var currentId = getCurrentId();
   if (currentId == null) {
-    return 4;
+    return 1;
   }
   return currentId;
 }
@@ -845,7 +919,7 @@ function setValues(ss, x, y, name, data) {
  * @param sprintLength String,   sprint length name.
  * @param nextId       int,      next story ID.
  */
-function createConfig(themeNames, backlogNames, sprintLength, sprintStartDay, nextId) {
+function createConfig(themeNames, backlogNames, sprintLength, sprintStartDay, nextId, themeColors) {
   // Get config sheet.
   var config = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Config");
   if (config == null) {
@@ -854,11 +928,12 @@ function createConfig(themeNames, backlogNames, sprintLength, sprintStartDay, ne
   }
   config.clear();
 
+  Logger.log("themeColors: " + themeColors);
   var row = 0
   setValues(config, ++row, 1, "nextId",       [['Next ID', nextId]]);
   setValues(config, ++row, 1, "themes",       [['Themes'].concat(themeNames)]);
   // Set theme colors
-  config.getRange(row, 2, 1, THEME_COLORS.length).setBackgroundColors([THEME_COLORS]);
+  config.getRange(row, 2, 1, themeColors.length).setBackgroundColors([themeColors]);
   setValues(config, ++row, 1, "backlogs",     [['Backlog Sheets'].concat(backlogNames)]);
   setValues(config, ++row, 1, "sprintLength", [['Sprint Length (days)', SPRINT_LENGTHS[sprintLength]["days"]]]);
   setValues(config, ++row, 1, "sprintStartDay", [['Sprint Start Day', DAY_OF_WEEK[sprintStartDay]["name"]]]);
@@ -915,10 +990,10 @@ function createSprints(backlogs, sprintStartDay, sprintLength, themes) {
   sprintStartDate1.setDate(sprintStartDate1.getDate() + delta);
   // Set second sprint based on first sprint and sprint length.
   var sprintStartDate2 = new Date(sprintStartDate1.getFullYear(), sprintStartDate1.getMonth(), sprintStartDate1.getDate() + SPRINT_LENGTHS[sprintLength]["days"]);
-  var sampleSprints = [["", "", "Sprint 1", Utilities.formatDate(sprintStartDate1, "EST", "yyyy/MM/dd")]]
+  var sampleSprints = [["", "", "Sprint 1", date(sprintStartDate1)]]
   sampleSprints.push([nextId(), themes[0], "As a <role>, I want <goal/desire> so that <benefit>", ""]);
   sampleSprints.push(["", "", "", ""]);
-  sampleSprints.push(["", "", "Sprint 2", Utilities.formatDate(sprintStartDate2, "EST", "yyyy/MM/dd")]);
+  sampleSprints.push(["", "", "Sprint 2", date(sprintStartDate2)]);
   sampleSprints.push(["", "", "", ""]);
   sampleSprints.push(["", "", "Unassigned", ""]);
 
@@ -981,11 +1056,15 @@ function onSubmitBtnClickHandler(event) {
   var sprintLength   = event.parameter.sprintLengthLst;
   var sprintStartDay = event.parameter.sprintStartDayLst;
   var nextId         = event.parameter.nextIdTxt.trim();
+  var themeColors    = getAllColors();
 
-  createConfig(themeNames, backlogNames, sprintLength, sprintStartDay, nextId);
+  createConfig(themeNames, backlogNames, sprintLength, sprintStartDay, nextId, themeColors);
   var backlogs = createBacklogs(backlogNames);
   createValidationRules(backlogs);
   createSprints(backlogs, sprintStartDay, sprintLength, themeNames);
+
+  onGenerateBurndownData();
+  onCreateCharts();
 
   return app.close();
 }
