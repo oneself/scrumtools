@@ -785,7 +785,7 @@ var THEME_COLORS = ["#9fc5e8", "#b4a7d6", "#ffe599", "#ea9999", "#93c47d"];
 function getConfigThemes() {
   var themes = getThemes();
   if (themes == null) {
-    return "Theme 1\nTheme 2\n";
+    return "";
   }
   return themes.join("\n");
 }
@@ -798,7 +798,7 @@ function getConfigThemes() {
 function getConfigBacklogs() {
   var backlogs = getBacklogs();
   if (backlogs == null) {
-    return "Backlogs";
+    return "";
   }
   return backlogs.join("\n");
 }
@@ -945,7 +945,6 @@ function createConfig(themeNames, backlogNames, sprintLength, sprintStartDay, ne
  * @param backlogNames String[], backlog names.
  */
 function createBacklogs(backlogNames) {
-  var backlogs = [];
   // Get spreadsheet.
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   for (var i = 0; i < backlogNames.length; ++i) {
@@ -966,10 +965,8 @@ function createBacklogs(backlogNames) {
         backlog.setColumnWidth(c + 1, COLUMN_WIDTHS[c]);
       }
       ss.setFrozenRows(1);
-      backlogs.push(backlog);
     }
   }
-  return backlogs;
 }
 
 /**
@@ -1016,18 +1013,23 @@ function createSprints(backlogs, sprintStartDay, sprintLength, themes) {
   }
 }
 
+function testCreateValidationRules() {
+  createValidationRules([SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Backlog")]);
+}
+
 /**
  * Create validation rules for themes and status.
  *
  * @param backlogs Sheet[], backlog names.
  */
-function createValidationRules(backlogs) {
-  for (var i = 0; i < backlogs.length; ++i) {
-    var backlog = backlogs[i];
+function createValidationRules(backlogNames) {
+  for (var i = 0; i < backlogNames.length; ++i) {
+    var backlog = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(backlogNames[i]);
     // Validate themes
     var r = backlog.getRange(2, 2, backlog.getMaxRows() - 2, 1);
     var dv = r.getDataValidation();
     dv.requireValuesInRange(SpreadsheetApp.getActive().getRangeByName("themes"));
+    //dv.requireValuesInRange("themes");
     dv.setHelpText("Select theme");
     dv.setShowDropDown(true);
     r.setDataValidation(dv);
@@ -1059,12 +1061,12 @@ function onSubmitBtnClickHandler(event) {
   var themeColors    = getAllColors();
 
   createConfig(themeNames, backlogNames, sprintLength, sprintStartDay, nextId, themeColors);
-  var backlogs = createBacklogs(backlogNames);
-  createValidationRules(backlogs);
-  createSprints(backlogs, sprintStartDay, sprintLength, themeNames);
+  createBacklogs(backlogNames);
+  createValidationRules(backlogNames);
+  //createSprints(backlogs, sprintStartDay, sprintLength, themeNames);
 
   onGenerateBurndownData();
-  onCreateCharts();
+  //onCreateCharts();
 
   return app.close();
 }
